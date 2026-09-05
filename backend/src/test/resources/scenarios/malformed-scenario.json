@@ -1,0 +1,19 @@
+{
+  "id": "malformed-scenario",
+  "description": "Missing steps and an invalid action type, used to test fail-loud loading.",
+  "intent": { "id": "test", "description": "test" },
+  "steps": [
+    {
+      "step": 1,
+      "actor": { "id": "agent-42", "type": "AGENT" },
+      "action": {
+        "id": "act-1",
+        "type": "NOT_A_REAL_ACTION_TYPE",
+        "resource": "customer-42",
+        "destination": { "id": "none", "kind": "NONE", "trustZone": "INTERNAL" }
+      },
+      "expectedRbac": "ALLOW",
+      "expectedTrajectory": "ALLOW"
+    }
+  ]
+}

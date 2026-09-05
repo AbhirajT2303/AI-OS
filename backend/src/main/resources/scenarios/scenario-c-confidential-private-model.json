@@ -1,0 +1,49 @@
+{
+  "id": "scenario-c-confidential-private-model",
+  "description": "Confidential data to an approved internal model. False-positive control: the engine must not deny merely because confidential data is present.",
+  "intent": { "id": "analyze-customer", "description": "Analyze a customer account." },
+  "steps": [
+    {
+      "step": 1,
+      "actor": { "id": "agent-42", "type": "AGENT" },
+      "action": {
+        "id": "act-1",
+        "type": "READ",
+        "resource": "customer-42",
+        "destination": { "id": "none", "kind": "NONE", "trustZone": "INTERNAL" },
+        "inputDataIds": [],
+        "outputDataId": "customer-42"
+      },
+      "expectedRbac": "ALLOW",
+      "expectedTrajectory": "ALLOW"
+    },
+    {
+      "step": 2,
+      "actor": { "id": "agent-42", "type": "AGENT" },
+      "action": {
+        "id": "act-2",
+        "type": "CALL_MODEL",
+        "resource": "customer-42",
+        "destination": { "id": "internal-llm", "kind": "MODEL", "trustZone": "INTERNAL" },
+        "inputDataIds": ["customer-42"],
+        "outputDataId": "analysis-1"
+      },
+      "expectedRbac": "ALLOW",
+      "expectedTrajectory": "ALLOW"
+    },
+    {
+      "step": 3,
+      "actor": { "id": "agent-42", "type": "AGENT" },
+      "action": {
+        "id": "act-3",
+        "type": "WRITE",
+        "resource": "internal-report-1",
+        "destination": { "id": "report-store", "kind": "DATASTORE", "trustZone": "INTERNAL" },
+        "inputDataIds": ["analysis-1"],
+        "outputDataId": "internal-report-1"
+      },
+      "expectedRbac": "ALLOW",
+      "expectedTrajectory": "ALLOW"
+    }
+  ]
+}

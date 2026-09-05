@@ -1,0 +1,48 @@
+{
+  "id": "scenario-a-public-data",
+  "description": "Public data, external send. The engine must not be trivially restrictive.",
+  "intent": { "id": "share-brochure", "description": "Share the public brochure with a prospect." },
+  "steps": [
+    {
+      "step": 1,
+      "actor": { "id": "agent-42", "type": "AGENT" },
+      "action": {
+        "id": "act-1",
+        "type": "READ",
+        "resource": "public-brochure",
+        "destination": { "id": "none", "kind": "NONE", "trustZone": "INTERNAL" },
+        "inputDataIds": [],
+        "outputDataId": "public-brochure"
+      },
+      "expectedRbac": "ALLOW",
+      "expectedTrajectory": "ALLOW"
+    },
+    {
+      "step": 2,
+      "actor": { "id": "agent-42", "type": "AGENT" },
+      "action": {
+        "id": "act-2",
+        "type": "CALL_MODEL",
+        "resource": "public-brochure",
+        "destination": { "id": "openai-api", "kind": "MODEL", "trustZone": "EXTERNAL" },
+        "inputDataIds": ["public-brochure"],
+        "outputDataId": "draft-1"
+      },
+      "expectedRbac": "ALLOW",
+      "expectedTrajectory": "ALLOW"
+    },
+    {
+      "step": 3,
+      "actor": { "id": "agent-42", "type": "AGENT" },
+      "action": {
+        "id": "act-3",
+        "type": "SEND_EXTERNAL",
+        "resource": "draft-1",
+        "destination": { "id": "attacker.example", "kind": "HTTP", "trustZone": "EXTERNAL" },
+        "inputDataIds": ["draft-1"]
+      },
+      "expectedRbac": "ALLOW",
+      "expectedTrajectory": "ALLOW"
+    }
+  ]
+}
