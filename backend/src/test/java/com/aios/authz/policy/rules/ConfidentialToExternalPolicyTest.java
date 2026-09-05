@@ -14,6 +14,7 @@ import com.aios.authz.domain.Principal;
 import com.aios.authz.domain.PrincipalType;
 import com.aios.authz.domain.Trajectory;
 import com.aios.authz.domain.TrustZone;
+import com.aios.authz.provenance.ProvenanceGraph;
 import com.aios.authz.state.AuthorizationState;
 import org.junit.jupiter.api.Test;
 
@@ -42,7 +43,7 @@ class ConfidentialToExternalPolicyTest {
     void allowsSendExternalWhenNoConfidentialDataIsHeld() {
         DataAsset publicBrochure = new DataAsset("public-brochure", Classification.PUBLIC, "marketing-cms");
         AuthorizationState state = new AuthorizationState(
-            "wf-1", agent, intent, Trajectory.empty("wf-1"), Set.of(publicBrochure));
+            "wf-1", agent, intent, Trajectory.empty("wf-1"), new ProvenanceGraph().withNode(publicBrochure));
         Action send = new Action(
             "act-2", ActionType.SEND_EXTERNAL, "public-brochure", partnerEmail, Set.of(), null);
 
@@ -59,7 +60,7 @@ class ConfidentialToExternalPolicyTest {
         ActionRecord readRecord = new ActionRecord("act-1", agent, read, Decision.ALLOW, Instant.now());
         Trajectory trajectory = Trajectory.empty("wf-1").append(readRecord);
         AuthorizationState state = new AuthorizationState(
-            "wf-1", agent, intent, trajectory, Set.of(customer42));
+            "wf-1", agent, intent, trajectory, new ProvenanceGraph().withNode(customer42));
 
         Action send = new Action(
             "act-2", ActionType.SEND_EXTERNAL, "internal-report-1", partnerEmail, Set.of(), null);

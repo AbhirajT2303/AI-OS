@@ -23,10 +23,11 @@ class AuthorizationStateTest {
     }
 
     @Test
-    void nullHeldAssetsDefaultsToEmptyNotNull() {
+    void nullProvenanceGraphDefaultsToEmptyNotNull() {
         AuthorizationState state = new AuthorizationState(
             "wf-1", agent, intent, com.aios.authz.domain.Trajectory.empty("wf-1"), null);
 
+        assertThat(state.provenanceGraph()).isNotNull();
         assertThat(state.heldAssets()).isNotNull().isEmpty();
     }
 

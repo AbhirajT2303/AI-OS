@@ -13,6 +13,7 @@ import com.aios.authz.domain.Principal;
 import com.aios.authz.domain.PrincipalType;
 import com.aios.authz.domain.Trajectory;
 import com.aios.authz.domain.TrustZone;
+import com.aios.authz.provenance.ProvenanceGraph;
 import com.aios.authz.state.AuthorizationState;
 import org.junit.jupiter.api.Test;
 
@@ -43,7 +44,7 @@ class ModelBoundaryPolicyTest {
     @Test
     void scenarioB_confidentialDataToExternalModel_denies() {
         AuthorizationState state = new AuthorizationState(
-            "wf-1", agent, intent, Trajectory.empty("wf-1"), Set.of(customer42));
+            "wf-1", agent, intent, Trajectory.empty("wf-1"), new ProvenanceGraph().withNode(customer42));
         Action callExternal = new Action(
             "act-2", ActionType.CALL_MODEL, "customer-42", externalLlm, Set.of("customer-42"), "summary-1");
 
@@ -53,7 +54,7 @@ class ModelBoundaryPolicyTest {
     @Test
     void scenarioC_confidentialDataToInternalModel_allows() {
         AuthorizationState state = new AuthorizationState(
-            "wf-1", agent, intent, Trajectory.empty("wf-1"), Set.of(customer42));
+            "wf-1", agent, intent, Trajectory.empty("wf-1"), new ProvenanceGraph().withNode(customer42));
         Action callInternal = new Action(
             "act-2", ActionType.CALL_MODEL, "customer-42", internalLlm, Set.of("customer-42"), "summary-1");
 
@@ -63,7 +64,7 @@ class ModelBoundaryPolicyTest {
     @Test
     void scenarioBAndCDifferOnlyByDestinationTrustZone() {
         AuthorizationState state = new AuthorizationState(
-            "wf-1", agent, intent, Trajectory.empty("wf-1"), Set.of(customer42));
+            "wf-1", agent, intent, Trajectory.empty("wf-1"), new ProvenanceGraph().withNode(customer42));
 
         Action callInternal = new Action(
             "act-2", ActionType.CALL_MODEL, "customer-42", internalLlm, Set.of("customer-42"), "summary-1");
@@ -82,7 +83,7 @@ class ModelBoundaryPolicyTest {
     void scenarioA_publicDataToExternalModel_stillAllows() {
         DataAsset publicBrochure = new DataAsset("public-brochure", Classification.PUBLIC, "marketing-cms");
         AuthorizationState state = new AuthorizationState(
-            "wf-1", agent, intent, Trajectory.empty("wf-1"), Set.of(publicBrochure));
+            "wf-1", agent, intent, Trajectory.empty("wf-1"), new ProvenanceGraph().withNode(publicBrochure));
         Action callExternal = new Action(
             "act-2", ActionType.CALL_MODEL, "public-brochure", externalLlm, Set.of("public-brochure"), "draft-1");
 
