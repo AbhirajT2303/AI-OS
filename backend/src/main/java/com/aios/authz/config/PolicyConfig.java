@@ -2,6 +2,7 @@ package com.aios.authz.config;
 
 import com.aios.authz.policy.Policy;
 import com.aios.authz.policy.PolicyRegistry;
+import com.aios.authz.policy.rules.PartnerDisclosureAskPolicy;
 import com.aios.authz.policy.rules.ProvenanceBoundaryPolicy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,6 +29,11 @@ public class PolicyConfig {
     @Bean
     public Policy provenanceBoundaryPolicy() {
         return new ProvenanceBoundaryPolicy();
+    }
+
+    @Bean
+    public Policy partnerDisclosureAskPolicy() {
+        return new PartnerDisclosureAskPolicy();
     }
 
     @Bean

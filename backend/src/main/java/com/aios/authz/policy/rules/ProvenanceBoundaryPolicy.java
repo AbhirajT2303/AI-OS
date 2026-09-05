@@ -58,6 +58,14 @@ public final class ProvenanceBoundaryPolicy implements Policy {
                 Set.of(), List.of());
         }
 
+        if (PartnerDisclosureAskPolicy.isEligible(effective, state.intent().id())) {
+            return new PolicyEvaluation(
+                id(), Decision.ALLOW,
+                "%s (effective %s) exceeds %s zone maximum %s, but is eligible for the partner-disclosure ASK carve-out — deferring to PartnerDisclosureAskPolicy"
+                    .formatted(resource, effective, action.destination().trustZone(), max),
+                Set.of(), List.of());
+        }
+
         Set<DataAsset> dominant = state.provenanceGraph().dominantRootsOf(resource);
         Set<String> dominantIds = dominant.stream().map(DataAsset::id).collect(Collectors.toUnmodifiableSet());
         List<ActionRecord> acquiringRecords = acquiringRecordsFor(state, dominantIds);
@@ -88,10 +96,11 @@ public final class ProvenanceBoundaryPolicy implements Policy {
      * The most sensitive classification a destination's trust zone may
      * silently receive. INTERNAL allows everything (RESTRICTED, the ceiling);
      * PARTNER and EXTERNAL only silently allow PUBLIC — anything above that
-     * either denies here or, for PARTNER specifically, is a candidate for a
-     * human-adjudicated ASK once {@code PartnerDisclosureAskPolicy} (ENG-41,
-     * Sprint 4) exists. See docs/SCENARIOS.md's open Scenario D/H
-     * inconsistency note for why that carve-out isn't implemented yet.
+     * either denies here or, for PARTNER specifically and only under an
+     * approved-disclosure intent, steps aside for
+     * {@link PartnerDisclosureAskPolicy} to ASK instead (ENG-41). RESTRICTED
+     * data is never eligible for that carve-out regardless of intent — see
+     * {@link PartnerDisclosureAskPolicy#isEligible}.
      */
     private static Classification maxAllowedFor(TrustZone zone) {
         return switch (zone) {

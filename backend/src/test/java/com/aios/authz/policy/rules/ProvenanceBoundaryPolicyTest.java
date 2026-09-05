@@ -136,4 +136,33 @@ class ProvenanceBoundaryPolicyTest {
 
         assertThat(evaluation.reason()).contains("agent-A").contains("agent-C");
     }
+
+    @Test
+    void stepsAsideForTheApprovedPartnerDisclosureCarveOutInsteadOfDenying() {
+        Intent approved = new Intent("approved-partner-disclosure", "Approved.");
+        DataAsset customer42 = new DataAsset("customer-42", Classification.CONFIDENTIAL, "customer-db");
+        AuthorizationState state = new AuthorizationState(
+            "wf-1", agent, approved, Trajectory.empty("wf-1"), new ProvenanceGraph().withNode(customer42));
+        Action send = new Action(
+            "act-1", ActionType.SEND_EXTERNAL, "customer-42", partnerEmail, Set.of(), null);
+
+        // This policy alone must ALLOW here — PartnerDisclosureAskPolicy is what
+        // turns this into an ASK; if this policy still denied, deny-overrides
+        // would make the carve-out unreachable regardless of the other policy.
+        assertThat(policy.evaluate(state, send, agent).decision()).isEqualTo(Decision.ALLOW);
+    }
+
+    @Test
+    void restrictedDataStillDeniesEvenUnderAnApprovedPartnerDisclosureIntent() {
+        Intent approved = new Intent("approved-partner-disclosure", "Approved.");
+        DataAsset pricingStrategy = new DataAsset("pricing-strategy", Classification.RESTRICTED, "pricing-db");
+        AuthorizationState state = new AuthorizationState(
+            "wf-1", agent, approved, Trajectory.empty("wf-1"), new ProvenanceGraph().withNode(pricingStrategy));
+        Action send = new Action(
+            "act-1", ActionType.SEND_EXTERNAL, "pricing-strategy", partnerEmail, Set.of(), null);
+
+        // The carve-out only ever narrows the CONFIDENTIAL+PARTNER cell — this
+        // proves Scenario E's RESTRICTED denial isn't weakened by its existence.
+        assertThat(policy.evaluate(state, send, agent).decision()).isEqualTo(Decision.DENY);
+    }
 }

@@ -1,0 +1,48 @@
+{
+  "id": "scenario-h-partner-disclosure",
+  "description": "CONFIDENTIAL (not RESTRICTED) data reaching PARTNER (not EXTERNAL), under an intent explicitly approved for partner disclosure — exactly the case a human should adjudicate, not the outright deny Scenario D's un-approved intent gets for the same classification/zone pair.",
+  "intent": { "id": "approved-partner-disclosure", "description": "Disclose an approved summary to our partner under the signed data-sharing agreement." },
+  "steps": [
+    {
+      "step": 1,
+      "actor": { "id": "agent-42", "type": "AGENT" },
+      "action": {
+        "id": "act-1",
+        "type": "READ",
+        "resource": "customer-42",
+        "destination": { "id": "none", "kind": "NONE", "trustZone": "INTERNAL" },
+        "inputDataIds": [],
+        "outputDataId": "customer-42"
+      },
+      "expectedRbac": "ALLOW",
+      "expectedTrajectory": "ALLOW"
+    },
+    {
+      "step": 2,
+      "actor": { "id": "agent-42", "type": "AGENT" },
+      "action": {
+        "id": "act-2",
+        "type": "WRITE",
+        "resource": "customer-42",
+        "destination": { "id": "report-store", "kind": "DATASTORE", "trustZone": "INTERNAL" },
+        "inputDataIds": ["customer-42"],
+        "outputDataId": "partner-summary"
+      },
+      "expectedRbac": "ALLOW",
+      "expectedTrajectory": "ALLOW"
+    },
+    {
+      "step": 3,
+      "actor": { "id": "agent-42", "type": "AGENT" },
+      "action": {
+        "id": "act-3",
+        "type": "SEND_EXTERNAL",
+        "resource": "partner-summary",
+        "destination": { "id": "partner.com", "kind": "EMAIL", "trustZone": "PARTNER" },
+        "inputDataIds": ["partner-summary"]
+      },
+      "expectedRbac": "ALLOW",
+      "expectedTrajectory": "ASK"
+    }
+  ]
+}
