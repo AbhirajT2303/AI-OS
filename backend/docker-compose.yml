@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: authz
+      POSTGRES_USER: authz
+      POSTGRES_PASSWORD: authz
+    ports:
+      - "5432:5432"
+    volumes:
+      - authz-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  authz-postgres-data:

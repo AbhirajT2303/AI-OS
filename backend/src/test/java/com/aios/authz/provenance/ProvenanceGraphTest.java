@@ -132,4 +132,28 @@ class ProvenanceGraphTest {
         assertThat(original.find("customer-42")).isEmpty();
         assertThat(updated.find("customer-42")).contains(asset);
     }
+
+    @Test
+    void twoIndependentlyBuiltGraphsWithTheSameNodesAreEqual() {
+        // Not object identity: this is what a round-trip through persistence
+        // (ENG-30) produces — a brand new instance that must still compare
+        // equal to the one that was saved.
+        DataAsset customer42 = new DataAsset("customer-42", Classification.CONFIDENTIAL, "customer-db");
+        DataAsset pricingStrategy = new DataAsset("pricing-strategy", Classification.RESTRICTED, "pricing-db");
+
+        ProvenanceGraph first = new ProvenanceGraph().withNode(customer42).withNode(pricingStrategy);
+        ProvenanceGraph second = new ProvenanceGraph().withNode(pricingStrategy).withNode(customer42);
+
+        assertThat(first).isEqualTo(second);
+        assertThat(first.hashCode()).isEqualTo(second.hashCode());
+    }
+
+    @Test
+    void graphsWithDifferentNodesAreNotEqual() {
+        DataAsset customer42 = new DataAsset("customer-42", Classification.CONFIDENTIAL, "customer-db");
+        ProvenanceGraph withNode = new ProvenanceGraph().withNode(customer42);
+        ProvenanceGraph empty = new ProvenanceGraph();
+
+        assertThat(withNode).isNotEqualTo(empty);
+    }
 }

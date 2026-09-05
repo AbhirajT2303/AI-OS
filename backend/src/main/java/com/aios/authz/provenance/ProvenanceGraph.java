@@ -39,6 +39,27 @@ public final class ProvenanceGraph {
         this.nodesById = nodesById;
     }
 
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (!(other instanceof ProvenanceGraph that)) {
+            return false;
+        }
+        return nodesById.equals(that.nodesById);
+    }
+
+    @Override
+    public int hashCode() {
+        return nodesById.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "ProvenanceGraph" + nodesById.keySet();
+    }
+
     /** Adds or replaces a node. Cheap: callers only ever add nodes for actions that were ALLOWed. */
     public ProvenanceGraph withNode(DataNode node) {
         Objects.requireNonNull(node, "node must not be null");
@@ -49,6 +70,17 @@ public final class ProvenanceGraph {
 
     public Optional<DataNode> find(String nodeId) {
         return Optional.ofNullable(nodesById.get(nodeId));
+    }
+
+    /**
+     * Every node the graph currently knows about — both {@link DataAsset} roots
+     * and {@link com.aios.authz.domain.DerivedData}. Reconstructing a graph from
+     * this set (fold {@link #withNode} over it) reproduces this one exactly;
+     * this is what persistence (ENG-30) round-trips through, rather than
+     * exposing the internal map directly.
+     */
+    public Set<DataNode> allNodes() {
+        return Set.copyOf(nodesById.values());
     }
 
     /** Every {@link DataAsset} root the graph currently knows about, regardless of what derives from it. */
