@@ -173,7 +173,7 @@ backend/
     │   │       └── FixtureConfig.java        # seed catalog + data assets
     │   │
     │   └── resources/
-    │       ├── application.yml
+    │       ├── application.properties
     │       ├── fixtures/
     │       │   ├── data-assets.json
     │       │   └── permissions.json
