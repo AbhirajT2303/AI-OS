@@ -26,6 +26,7 @@ conditions.
 | [planning/BACKLOG.md](planning/BACKLOG.md) | Epics and stories with acceptance criteria. |
 | [planning/SPRINTS.md](planning/SPRINTS.md) | Sprint plan, G1–G6 milestone mapping. |
 | [planning/DEFINITION_OF_DONE.md](planning/DEFINITION_OF_DONE.md) | Story-level and phase-level DoD. |
+| [planning/GIT_WORKFLOW.md](planning/GIT_WORKFLOW.md) | Branching, merging, commit message convention. |
 | `backend/` | Spring Boot application. |
 
 ---

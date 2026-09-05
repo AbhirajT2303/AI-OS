@@ -261,6 +261,9 @@ show the comparison has not demonstrated progress toward the thesis, whatever el
 **Carry-over rule:** an unfinished story returns to the backlog at its remaining estimate. Do
 not extend a sprint — the phase gate dates are what keep the kill conditions real.
 
+**Git:** one branch per story, squash-merged to `main`; each sprint's demo point gets a git
+tag. See [GIT_WORKFLOW.md](GIT_WORKFLOW.md).
+
 **Scope guard.** Before accepting any story into a sprint, check it against
 [PROJECT_CONTEXT.md](../PROJECT_CONTEXT.md) §36. If it needs a dashboard, an LLM, a broker or
 a policy DSL, it is not a 1G story.
