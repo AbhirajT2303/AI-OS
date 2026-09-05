@@ -4,6 +4,7 @@ import com.aios.authz.domain.Action;
 import com.aios.authz.domain.ActionType;
 import com.aios.authz.domain.Decision;
 import com.aios.authz.domain.PolicyEvaluation;
+import com.aios.authz.domain.Principal;
 import com.aios.authz.domain.TrustZone;
 import com.aios.authz.policy.Policy;
 import com.aios.authz.policy.rules.ConfidentialDataEvidence.Evidence;
@@ -36,7 +37,7 @@ public final class ModelBoundaryPolicy implements Policy {
     }
 
     @Override
-    public PolicyEvaluation evaluate(AuthorizationState state, Action action) {
+    public PolicyEvaluation evaluate(AuthorizationState state, Action action, Principal actingPrincipal) {
         if (action.destination().trustZone() != TrustZone.EXTERNAL) {
             return new PolicyEvaluation(
                 id(), Decision.ALLOW, "model destination is not external", Set.of(), List.of());

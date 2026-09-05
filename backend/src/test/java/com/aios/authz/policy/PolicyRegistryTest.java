@@ -29,7 +29,7 @@ class PolicyRegistryTest {
         Policy abstains = fixedPolicy("abstainer", false, Decision.ALLOW);
         PolicyRegistry registry = new PolicyRegistry(List.of(abstains));
 
-        assertThat(registry.evaluate(state, read)).isEmpty();
+        assertThat(registry.evaluate(state, read, state.initiator())).isEmpty();
     }
 
     @Test
@@ -38,7 +38,7 @@ class PolicyRegistryTest {
         Policy second = fixedPolicy("second", true, Decision.DENY);
         PolicyRegistry registry = new PolicyRegistry(List.of(first, second));
 
-        List<PolicyEvaluation> evaluations = registry.evaluate(state, read);
+        List<PolicyEvaluation> evaluations = registry.evaluate(state, read, state.initiator());
 
         assertThat(evaluations).extracting(PolicyEvaluation::policyId).containsExactly("first", "second");
     }
@@ -47,7 +47,7 @@ class PolicyRegistryTest {
         return new Policy() {
             @Override public String id() { return id; }
             @Override public boolean appliesTo(AuthorizationState s, Action a) { return applies; }
-            @Override public PolicyEvaluation evaluate(AuthorizationState s, Action a) {
+            @Override public PolicyEvaluation evaluate(AuthorizationState s, Action a, Principal p) {
                 return new PolicyEvaluation(id, decision, "fixed for test", Set.of(), List.of());
             }
         };

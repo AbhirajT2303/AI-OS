@@ -7,6 +7,7 @@ import com.aios.authz.domain.Classification;
 import com.aios.authz.domain.DataAsset;
 import com.aios.authz.domain.Decision;
 import com.aios.authz.domain.PolicyEvaluation;
+import com.aios.authz.domain.Principal;
 import com.aios.authz.domain.TrustZone;
 import com.aios.authz.policy.Policy;
 import com.aios.authz.state.AuthorizationState;
@@ -44,7 +45,7 @@ public final class ProvenanceBoundaryPolicy implements Policy {
     }
 
     @Override
-    public PolicyEvaluation evaluate(AuthorizationState state, Action action) {
+    public PolicyEvaluation evaluate(AuthorizationState state, Action action, Principal actingPrincipal) {
         String resource = action.resource();
         Classification effective = state.provenanceGraph().effectiveClassification(resource);
         Classification max = maxAllowedFor(action.destination().trustZone());
@@ -59,22 +60,27 @@ public final class ProvenanceBoundaryPolicy implements Policy {
 
         Set<DataAsset> dominant = state.provenanceGraph().dominantRootsOf(resource);
         Set<String> dominantIds = dominant.stream().map(DataAsset::id).collect(Collectors.toUnmodifiableSet());
-        List<String> acquiringActionIds = acquiringActionIdsFor(state, dominantIds);
+        List<ActionRecord> acquiringRecords = acquiringRecordsFor(state, dominantIds);
+        List<String> acquiringActionIds = acquiringRecords.stream().map(ActionRecord::id).toList();
 
-        String reason = "%s exceeds %s zone maximum %s: effective classification %s derives from %s, acquired at %s"
-            .formatted(
-                resource, action.destination().trustZone(), max, effective,
-                String.join(", ", dominantIds), String.join(", ", acquiringActionIds));
+        String acquirers = acquiringRecords.stream()
+            .map(record -> "%s at %s".formatted(record.actor().id(), record.id()))
+            .collect(Collectors.joining(", "));
+
+        String reason =
+            "%s exceeds %s zone maximum %s: effective classification %s derives from %s, acquired by %s; %s now attempts to send it"
+                .formatted(
+                    resource, action.destination().trustZone(), max, effective,
+                    String.join(", ", dominantIds), acquirers, actingPrincipal.id());
 
         return new PolicyEvaluation(id(), Decision.DENY, reason, dominantIds, acquiringActionIds);
     }
 
-    private static List<String> acquiringActionIdsFor(AuthorizationState state, Set<String> rootIds) {
+    private static List<ActionRecord> acquiringRecordsFor(AuthorizationState state, Set<String> rootIds) {
         return state.trajectory().actions().stream()
             .filter(record -> record.decision() == Decision.ALLOW
                 && record.action().type() == ActionType.READ
                 && rootIds.contains(record.action().resource()))
-            .map(ActionRecord::id)
             .toList();
     }
 

@@ -48,7 +48,7 @@ class ModelBoundaryPolicyTest {
         Action callExternal = new Action(
             "act-2", ActionType.CALL_MODEL, "customer-42", externalLlm, Set.of("customer-42"), "summary-1");
 
-        assertThat(policy.evaluate(state, callExternal).decision()).isEqualTo(Decision.DENY);
+        assertThat(policy.evaluate(state, callExternal, agent).decision()).isEqualTo(Decision.DENY);
     }
 
     @Test
@@ -58,7 +58,7 @@ class ModelBoundaryPolicyTest {
         Action callInternal = new Action(
             "act-2", ActionType.CALL_MODEL, "customer-42", internalLlm, Set.of("customer-42"), "summary-1");
 
-        assertThat(policy.evaluate(state, callInternal).decision()).isEqualTo(Decision.ALLOW);
+        assertThat(policy.evaluate(state, callInternal, agent).decision()).isEqualTo(Decision.ALLOW);
     }
 
     @Test
@@ -71,8 +71,8 @@ class ModelBoundaryPolicyTest {
         Action callExternal = new Action(
             "act-3", ActionType.CALL_MODEL, "customer-42", externalLlm, Set.of("customer-42"), "summary-1");
 
-        Decision internalDecision = policy.evaluate(state, callInternal).decision();
-        Decision externalDecision = policy.evaluate(state, callExternal).decision();
+        Decision internalDecision = policy.evaluate(state, callInternal, agent).decision();
+        Decision externalDecision = policy.evaluate(state, callExternal, agent).decision();
 
         assertThat(callInternal.type()).isEqualTo(callExternal.type());
         assertThat(callInternal.resource()).isEqualTo(callExternal.resource());
@@ -87,7 +87,7 @@ class ModelBoundaryPolicyTest {
         Action callExternal = new Action(
             "act-2", ActionType.CALL_MODEL, "public-brochure", externalLlm, Set.of("public-brochure"), "draft-1");
 
-        PolicyEvaluation evaluation = policy.evaluate(state, callExternal);
+        PolicyEvaluation evaluation = policy.evaluate(state, callExternal, agent);
 
         assertThat(evaluation.decision()).isEqualTo(Decision.ALLOW);
     }

@@ -82,5 +82,11 @@ class ScenarioFCrossAgentProvenanceTest {
         assertThat(finalStep.rbacResult().decision()).isEqualTo(Decision.ALLOW);
         assertThat(finalStep.trajectoryResult().decision()).isEqualTo(Decision.DENY);
         assertThat(finalStep.isDivergent()).isTrue();
+
+        // ENG-29: the explanation names both agent-A, who acquired customer-42
+        // three steps earlier, and agent-C, who is attempting the send now —
+        // distinct principals, neither of which the naive single-request view
+        // agent-C's own call presents on its own.
+        assertThat(finalStep.trajectoryResult().explanation()).contains("agent-A").contains("agent-C");
     }
 }

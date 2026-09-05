@@ -4,6 +4,7 @@ import com.aios.authz.domain.Action;
 import com.aios.authz.domain.ActionType;
 import com.aios.authz.domain.Decision;
 import com.aios.authz.domain.PolicyEvaluation;
+import com.aios.authz.domain.Principal;
 import com.aios.authz.policy.Policy;
 import com.aios.authz.policy.rules.ConfidentialDataEvidence.Evidence;
 import com.aios.authz.state.AuthorizationState;
@@ -31,7 +32,7 @@ public final class ConfidentialToExternalPolicy implements Policy {
     }
 
     @Override
-    public PolicyEvaluation evaluate(AuthorizationState state, Action action) {
+    public PolicyEvaluation evaluate(AuthorizationState state, Action action, Principal actingPrincipal) {
         Evidence evidence = ConfidentialDataEvidence.confidentialOrAboveHeldIn(state);
 
         if (evidence.isEmpty()) {

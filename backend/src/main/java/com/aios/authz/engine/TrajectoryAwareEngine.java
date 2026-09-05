@@ -68,7 +68,7 @@ public final class TrajectoryAwareEngine implements AuthorizationEngine {
         if (rbacResult.decision() == Decision.DENY) {
             combined = Decision.DENY;
         } else {
-            evaluations.addAll(policyRegistry.evaluate(state, request.requestedAction()));
+            evaluations.addAll(policyRegistry.evaluate(state, request.requestedAction(), request.principal()));
             combined = DecisionCombiner.combine(evaluations);
         }
 

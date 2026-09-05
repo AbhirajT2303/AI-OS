@@ -47,7 +47,7 @@ class ConfidentialToExternalPolicyTest {
         Action send = new Action(
             "act-2", ActionType.SEND_EXTERNAL, "public-brochure", partnerEmail, Set.of(), null);
 
-        PolicyEvaluation evaluation = policy.evaluate(state, send);
+        PolicyEvaluation evaluation = policy.evaluate(state, send, agent);
 
         assertThat(evaluation.decision()).isEqualTo(Decision.ALLOW);
     }
@@ -65,7 +65,7 @@ class ConfidentialToExternalPolicyTest {
         Action send = new Action(
             "act-2", ActionType.SEND_EXTERNAL, "internal-report-1", partnerEmail, Set.of(), null);
 
-        PolicyEvaluation evaluation = policy.evaluate(state, send);
+        PolicyEvaluation evaluation = policy.evaluate(state, send, agent);
 
         assertThat(evaluation.decision()).isEqualTo(Decision.DENY);
         assertThat(evaluation.contributingDataIds()).containsExactly("customer-42");

@@ -50,7 +50,7 @@ class ProvenanceBoundaryPolicyTest {
         Action send = new Action(
             "act-2", ActionType.SEND_EXTERNAL, "public-brochure", partnerEmail, Set.of(), null);
 
-        assertThat(policy.evaluate(state, send).decision()).isEqualTo(Decision.ALLOW);
+        assertThat(policy.evaluate(state, send, agent).decision()).isEqualTo(Decision.ALLOW);
     }
 
     @Test
@@ -61,7 +61,7 @@ class ProvenanceBoundaryPolicyTest {
         Action callInternal = new Action(
             "act-2", ActionType.CALL_MODEL, "customer-42", internalLlm, Set.of("customer-42"), "summary-1");
 
-        assertThat(policy.evaluate(state, callInternal).decision()).isEqualTo(Decision.ALLOW);
+        assertThat(policy.evaluate(state, callInternal, agent).decision()).isEqualTo(Decision.ALLOW);
     }
 
     @Test
@@ -81,7 +81,7 @@ class ProvenanceBoundaryPolicyTest {
         Action send = new Action(
             "act-3", ActionType.SEND_EXTERNAL, "pricing-strategy", partnerEmail, Set.of(), null);
 
-        PolicyEvaluation evaluation = policy.evaluate(state, send);
+        PolicyEvaluation evaluation = policy.evaluate(state, send, agent);
 
         assertThat(evaluation.decision()).isEqualTo(Decision.DENY);
         assertThat(evaluation.contributingDataIds()).containsExactly("pricing-strategy");
@@ -112,6 +112,28 @@ class ProvenanceBoundaryPolicyTest {
         Action send = new Action(
             "act-3", ActionType.SEND_EXTERNAL, "public-summary", partnerEmail, Set.of(), null);
 
-        assertThat(policy.evaluate(state, send).decision()).isEqualTo(Decision.ALLOW);
+        assertThat(policy.evaluate(state, send, agent).decision()).isEqualTo(Decision.ALLOW);
+    }
+
+    @Test
+    void explanationNamesBothTheAcquiringPrincipalAndTheOneAttemptingToSend() {
+        Principal agentA = new Principal("agent-A", PrincipalType.AGENT);
+        Principal agentC = new Principal("agent-C", PrincipalType.AGENT);
+        DataAsset customer42 = new DataAsset("customer-42", Classification.CONFIDENTIAL, "customer-db");
+        Action readCustomer = new Action(
+            "act-1", ActionType.READ, "customer-42", Destination.NONE, Set.of(), "customer-42");
+        Trajectory trajectory = Trajectory.empty("wf-1")
+            .append(new ActionRecord("act-1", agentA, readCustomer, Decision.ALLOW, Instant.now()));
+        ProvenanceGraph graph = new ProvenanceGraph().withNode(customer42);
+        AuthorizationState state = new AuthorizationState("wf-1", agentA, intent, trajectory, graph);
+
+        Action send = new Action(
+            "act-2", ActionType.SEND_EXTERNAL, "customer-42", partnerEmail, Set.of(), null);
+
+        // agent-C is evaluating a send it proposes itself — a different
+        // principal from agent-A, who acquired the data three steps earlier.
+        PolicyEvaluation evaluation = policy.evaluate(state, send, agentC);
+
+        assertThat(evaluation.reason()).contains("agent-A").contains("agent-C");
     }
 }

@@ -2,6 +2,7 @@ package com.aios.authz.policy;
 
 import com.aios.authz.domain.Action;
 import com.aios.authz.domain.PolicyEvaluation;
+import com.aios.authz.domain.Principal;
 import com.aios.authz.state.AuthorizationState;
 
 import java.util.List;
@@ -22,10 +23,10 @@ public final class PolicyRegistry {
         this.policies = List.copyOf(policies);
     }
 
-    public List<PolicyEvaluation> evaluate(AuthorizationState state, Action action) {
+    public List<PolicyEvaluation> evaluate(AuthorizationState state, Action action, Principal actingPrincipal) {
         return policies.stream()
             .filter(policy -> policy.appliesTo(state, action))
-            .map(policy -> policy.evaluate(state, action))
+            .map(policy -> policy.evaluate(state, action, actingPrincipal))
             .toList();
     }
 }
