@@ -1,6 +1,8 @@
 package com.aios.authz.api;
 
 import com.aios.authz.api.dto.ActionRecordDto;
+import com.aios.authz.api.dto.DelegateRequestDto;
+import com.aios.authz.api.dto.DelegationDto;
 import com.aios.authz.api.dto.IntentDto;
 import com.aios.authz.api.dto.OpenWorkflowRequestDto;
 import com.aios.authz.api.dto.OpenWorkflowResponseDto;
@@ -8,6 +10,7 @@ import com.aios.authz.api.dto.PrincipalDto;
 import com.aios.authz.api.dto.ProvenanceNodeDto;
 import com.aios.authz.api.dto.WorkflowStateDto;
 import com.aios.authz.domain.ActionRecord;
+import com.aios.authz.domain.Delegation;
 import com.aios.authz.domain.Intent;
 import com.aios.authz.domain.Principal;
 import com.aios.authz.state.AuthorizationState;
@@ -50,6 +53,12 @@ public class WorkflowController {
         return toDto(state);
     }
 
+    @PostMapping("/workflows/{workflowId}/delegate")
+    public void delegate(@PathVariable String workflowId, @Valid @RequestBody DelegateRequestDto request) {
+        workflowManager.delegate(
+            workflowId, request.fromPrincipalId(), request.toPrincipalId(), request.transferredDataIds());
+    }
+
     private static WorkflowStateDto toDto(AuthorizationState state) {
         List<ActionRecordDto> trajectory = state.trajectory().actions().stream()
             .map(WorkflowController::toDto)
@@ -70,12 +79,25 @@ public class WorkflowController {
             .filter(Objects::nonNull)
             .toList();
 
+        List<DelegationDto> delegations = state.trajectory().delegations().stream()
+            .map(WorkflowController::toDto)
+            .toList();
+
         return new WorkflowStateDto(
             state.workflowId(),
             new PrincipalDto(state.initiator().id(), state.initiator().type()),
             new IntentDto(state.intent().id(), state.intent().description()),
             trajectory,
+            delegations,
             provenance);
+    }
+
+    private static DelegationDto toDto(Delegation delegation) {
+        return new DelegationDto(
+            delegation.fromPrincipalId(),
+            delegation.toPrincipalId(),
+            delegation.transferredDataIds(),
+            delegation.timestamp().toString());
     }
 
     private static ActionRecordDto toDto(ActionRecord record) {

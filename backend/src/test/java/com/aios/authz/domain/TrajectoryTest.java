@@ -42,6 +42,18 @@ class TrajectoryTest {
             .containsExactly(Decision.ALLOW, Decision.DENY, Decision.ASK);
     }
 
+    @Test
+    void appendDelegationReturnsANewInstanceRatherThanMutating() {
+        Trajectory original = Trajectory.empty("wf-1");
+        Delegation delegation = new Delegation("agent-A", "agent-B", Set.of("customer-42"), Instant.now());
+
+        Trajectory appended = original.appendDelegation(delegation);
+
+        assertThat(original.delegations()).isEmpty();
+        assertThat(appended.delegations()).containsExactly(delegation);
+        assertThat(appended.actions()).isEmpty();
+    }
+
     private ActionRecord allowedRead(String id) {
         Action read = new Action(id, ActionType.READ, "customer-42", Destination.NONE, Set.of(), "customer-42");
         return new ActionRecord(id, agent, read, Decision.ALLOW, Instant.now());
