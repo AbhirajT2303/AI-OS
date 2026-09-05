@@ -43,11 +43,30 @@ class AuthorizationControllerTest {
     }
 
     @Test
-    void rejectsBlankWorkflowIdWith400() throws Exception {
+    void rejectsBlankWorkflowIdWith400AsAProblemDetail() throws Exception {
         String body = VALID_BODY.replaceFirst("\"wf-1\"", "\"\"");
 
         mockMvc.perform(post("/authorize").contentType(MediaType.APPLICATION_JSON).content(body))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.title").value("Validation failed"))
+            .andExpect(jsonPath("$.detail").value(containsString("workflowId")));
+    }
+
+    @Test
+    void rejectsBlankOutputDataIdWith400ViaTheDomainConstructorNotBeanValidation() throws Exception {
+        // outputDataId has no bean-validation annotation on the DTO (it's
+        // optional) — a blank-but-non-null value passes DTO validation and only
+        // fails in domain.Action's own compact constructor. This exercises the
+        // IllegalArgumentException path of GlobalExceptionHandler, distinct from
+        // the MethodArgumentNotValidException path above.
+        String body = VALID_BODY.replaceFirst(
+            "\"inputDataIds\": \\[\"report-123\"\\]",
+            "\"inputDataIds\": [\"report-123\"], \"outputDataId\": \" \"");
+
+        mockMvc.perform(post("/authorize").contentType(MediaType.APPLICATION_JSON).content(body))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.title").value("Invalid request"))
+            .andExpect(jsonPath("$.detail").value(containsString("outputDataId")));
     }
 
     @Test
@@ -74,6 +93,13 @@ class AuthorizationControllerTest {
             .andExpect(status().isOk())
             .andReturn().getResponse().getContentAsString();
 
-        assertThat(responseWithForged).isEqualTo(responseWithout);
+        // evaluationTimeMs is real wall-clock timing and will legitimately
+        // differ between the two calls; normalize it out before comparing so
+        // the assertion is about the decision, not measurement noise.
+        assertThat(withoutTiming(responseWithForged)).isEqualTo(withoutTiming(responseWithout));
+    }
+
+    private static String withoutTiming(String responseBody) {
+        return responseBody.replaceFirst("\"evaluationTimeMs\":\\d+", "\"evaluationTimeMs\":0");
     }
 }
