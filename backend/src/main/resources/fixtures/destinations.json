@@ -1,0 +1,7 @@
+[
+  { "id": "internal-llm",     "kind": "MODEL",     "trustZone": "INTERNAL" },
+  { "id": "openai-api",       "kind": "MODEL",     "trustZone": "EXTERNAL" },
+  { "id": "partner.com",      "kind": "EMAIL",     "trustZone": "PARTNER" },
+  { "id": "attacker.example", "kind": "HTTP",      "trustZone": "EXTERNAL" },
+  { "id": "report-store",     "kind": "DATASTORE", "trustZone": "INTERNAL" }
+]

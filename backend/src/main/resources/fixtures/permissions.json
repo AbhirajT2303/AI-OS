@@ -1,0 +1,22 @@
+[
+  {
+    "principalId": "agent-42",
+    "actionTypes": ["READ", "WRITE", "CALL_TOOL", "CALL_MODEL", "TRANSFORM", "SEND_EXTERNAL", "DELEGATE"],
+    "resourcePattern": "*"
+  },
+  {
+    "principalId": "agent-A",
+    "actionTypes": ["READ", "WRITE", "CALL_TOOL", "CALL_MODEL", "TRANSFORM", "SEND_EXTERNAL", "DELEGATE"],
+    "resourcePattern": "*"
+  },
+  {
+    "principalId": "agent-B",
+    "actionTypes": ["READ", "WRITE", "CALL_TOOL", "CALL_MODEL", "TRANSFORM", "SEND_EXTERNAL", "DELEGATE"],
+    "resourcePattern": "*"
+  },
+  {
+    "principalId": "agent-C",
+    "actionTypes": ["READ", "WRITE", "CALL_TOOL", "CALL_MODEL", "TRANSFORM", "SEND_EXTERNAL", "DELEGATE"],
+    "resourcePattern": "*"
+  }
+]

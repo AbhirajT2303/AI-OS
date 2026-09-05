@@ -1,0 +1,7 @@
+[
+  { "id": "public-brochure",     "classification": "PUBLIC",       "source": "marketing-cms" },
+  { "id": "customer-42",         "classification": "CONFIDENTIAL", "source": "customer-db" },
+  { "id": "pricing-strategy",    "classification": "RESTRICTED",   "source": "pricing-db" },
+  { "id": "support-tickets-42",  "classification": "INTERNAL",     "source": "support-db" },
+  { "id": "partner-nda-terms",   "classification": "INTERNAL",     "source": "contracts-db" }
+]
