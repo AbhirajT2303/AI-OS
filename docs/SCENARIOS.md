@@ -201,6 +201,16 @@ Exercises `ASK`, which no other scenario covers.
 intent is exactly the case a human should adjudicate. Compare with Scenario E, where
 `RESTRICTED` makes it an outright DENY.
 
+> **Open inconsistency, to resolve before ENG-41 (Sprint 4):** as written, Scenario D
+> (§ above) and Scenario H are both "`CONFIDENTIAL` data reaches `PARTNER`", yet D expects
+> DENY and H expects ASK. Nothing currently in either table distinguishes them — Scenario D's
+> step 4 sends a report *written* from a model summary, Scenario H's step 3 sends a
+> `partner-summary` that's arguably the same shape. `ProvenanceBoundaryPolicy` (ENG-25,
+> Sprint 3) implements only the DENY side of this; `PartnerDisclosureAskPolicy` (ENG-41,
+> Sprint 4) needs a concrete, testable condition that fires for H but not D — e.g. Scenario H's
+> intent explicitly names an approved partner-disclosure agreement and Scenario D's doesn't.
+> Fix the fixtures/intents to encode that distinction before ENG-41, not after.
+
 ---
 
 ## Summary — the experiment
