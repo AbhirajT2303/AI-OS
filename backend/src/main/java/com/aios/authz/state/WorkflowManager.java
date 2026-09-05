@@ -4,12 +4,14 @@ import com.aios.authz.domain.Intent;
 import com.aios.authz.domain.Principal;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Opens new workflows. This, not the API controller, is where a workflow id is
- * minted and its initial state persisted — keeping that decision out of the
- * HTTP layer so it stays testable without a servlet context.
+ * Opens new workflows and looks up their current state. Opening, not the API
+ * controller, is where a workflow id is minted and its initial state
+ * persisted — keeping that decision out of the HTTP layer so it stays
+ * testable without a servlet context.
  */
 public final class WorkflowManager {
 
@@ -23,5 +25,9 @@ public final class WorkflowManager {
         String workflowId = "wf-" + UUID.randomUUID();
         stateStore.save(AuthorizationState.open(workflowId, initiator, intent));
         return workflowId;
+    }
+
+    public Optional<AuthorizationState> find(String workflowId) {
+        return stateStore.find(workflowId);
     }
 }

@@ -36,4 +36,20 @@ class WorkflowManagerTest {
 
         assertThat(first).isNotEqualTo(second);
     }
+
+    @Test
+    void findReturnsEmptyForAnUnknownWorkflow() {
+        WorkflowManager manager = new WorkflowManager(new InMemoryAuthorizationStateStore());
+
+        assertThat(manager.find("wf-never-opened")).isEmpty();
+    }
+
+    @Test
+    void findReturnsTheStateOpenPersisted() {
+        WorkflowManager manager = new WorkflowManager(new InMemoryAuthorizationStateStore());
+
+        String workflowId = manager.open(agent, intent);
+
+        assertThat(manager.find(workflowId)).isPresent();
+    }
 }

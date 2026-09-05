@@ -1,5 +1,9 @@
 package com.aios.authz.api;
 
+import com.aios.authz.domain.Intent;
+import com.aios.authz.domain.Principal;
+import com.aios.authz.domain.PrincipalType;
+import com.aios.authz.state.WorkflowManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -7,6 +11,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -17,6 +22,9 @@ class WorkflowControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private WorkflowManager workflowManager;
 
     @Test
     void opensAWorkflowAndReturnsItsId() throws Exception {
@@ -42,5 +50,27 @@ class WorkflowControllerTest {
 
         mockMvc.perform(post("/workflows").contentType(MediaType.APPLICATION_JSON).content(body))
             .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getReturnsTheFreshlyOpenedWorkflowsStateWithAnEmptyTrajectory() throws Exception {
+        String workflowId = workflowManager.open(
+            new Principal("agent-42", PrincipalType.AGENT),
+            new Intent("partner-report", "Prepare a report for a partner."));
+
+        mockMvc.perform(get("/workflows/{workflowId}", workflowId))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.workflowId").value(workflowId))
+            .andExpect(jsonPath("$.initiator.id").value("agent-42"))
+            .andExpect(jsonPath("$.intent.id").value("partner-report"))
+            .andExpect(jsonPath("$.trajectory").isEmpty())
+            .andExpect(jsonPath("$.provenance").isEmpty());
+    }
+
+    @Test
+    void getRejectsAnUnknownWorkflowIdWith404() throws Exception {
+        mockMvc.perform(get("/workflows/{workflowId}", "wf-never-opened"))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.title").value("Unknown workflow"));
     }
 }
