@@ -4,6 +4,7 @@ import com.aios.authz.policy.Policy;
 import com.aios.authz.policy.PolicyRegistry;
 import com.aios.authz.policy.rules.PartnerDisclosureAskPolicy;
 import com.aios.authz.policy.rules.ProvenanceBoundaryPolicy;
+import com.aios.authz.policy.rules.RiskBudgetPolicy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -34,6 +35,11 @@ public class PolicyConfig {
     @Bean
     public Policy partnerDisclosureAskPolicy() {
         return new PartnerDisclosureAskPolicy();
+    }
+
+    @Bean
+    public Policy riskBudgetPolicy() {
+        return new RiskBudgetPolicy();
     }
 
     @Bean
