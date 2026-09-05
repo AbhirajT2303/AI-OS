@@ -73,7 +73,6 @@ trailer that ties the commit back to its backlog entry.
  or the finding if this is a 1H attack story. Wrap at ~72 chars.>
 
 Story: ENG-04
-Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
 ```
 
 **`type`** — one of:
@@ -107,7 +106,6 @@ this is the primitive ProvenanceGraph's effectiveClassification will
 build on (ENG-22).
 
 Story: ENG-04
-Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
 ```
 
 ```text
@@ -118,7 +116,6 @@ to confirm deny-overrides doesn't depend on registration order — this
 is what keeps policy composition safe as rules are added later.
 
 Story: ENG-18
-Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
 ```
 
 ```text
