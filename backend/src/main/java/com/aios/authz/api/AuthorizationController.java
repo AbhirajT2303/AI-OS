@@ -23,14 +23,11 @@ import java.util.UUID;
 /**
  * Authorizes one proposed action.
  *
- * <p>Wired to {@link AuthorizationEngine} rather than
- * {@code RbacBaselineEngine} directly, but in Sprint 1 that engine
- * <em>is</em> the RBAC baseline — {@code TrajectoryAwareEngine} does not exist
- * until ENG-21 (Sprint 2). Once it does, both will be
- * {@code AuthorizationEngine} beans and the wiring here must be resolved
- * ({@code @Primary} or an explicit qualifier) as part of that story, not
- * silently. Workflow existence (404 on an unknown {@code workflowId}) is
- * likewise deferred to ENG-16, since nothing yet tracks which workflows exist.
+ * <p>Wired to the {@code @Primary} {@link AuthorizationEngine} bean
+ * ({@code TrajectoryAwareEngine} — see {@code EngineConfig}, ENG-21), not
+ * {@code RbacBaselineEngine} directly. An unknown {@code workflowId} surfaces
+ * as {@code UnknownWorkflowException}, mapped to 404 by
+ * {@link GlobalExceptionHandler}.
  */
 @RestController
 public class AuthorizationController {

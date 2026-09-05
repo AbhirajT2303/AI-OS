@@ -1,9 +1,13 @@
 package com.aios.authz.api;
 
+import com.aios.authz.domain.Intent;
+import com.aios.authz.domain.Principal;
+import com.aios.authz.domain.PrincipalType;
+import com.aios.authz.state.WorkflowManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -20,9 +24,12 @@ class AuthorizationControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    private static final String VALID_BODY = """
+    @Autowired
+    private WorkflowManager workflowManager;
+
+    private static final String BODY_TEMPLATE = """
         {
-          "workflowId": "wf-1",
+          "workflowId": "%s",
           "principal": { "id": "agent-42", "type": "AGENT" },
           "intent": { "id": "partner-report", "description": "Prepare a report for a partner." },
           "requestedAction": {
@@ -34,9 +41,17 @@ class AuthorizationControllerTest {
         }
         """;
 
+    private String openWorkflow() {
+        return workflowManager.open(
+            new Principal("agent-42", PrincipalType.AGENT),
+            new Intent("partner-report", "Prepare a report for a partner."));
+    }
+
     @Test
     void allowsWhenAgent42SendsExternallyPerFixturePermissions() throws Exception {
-        mockMvc.perform(post("/authorize").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
+        String body = BODY_TEMPLATE.formatted(openWorkflow());
+
+        mockMvc.perform(post("/authorize").contentType(MediaType.APPLICATION_JSON).content(body))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.decision").value("ALLOW"))
             .andExpect(jsonPath("$.explanation").value(containsString("agent-42")));
@@ -44,7 +59,7 @@ class AuthorizationControllerTest {
 
     @Test
     void rejectsBlankWorkflowIdWith400AsAProblemDetail() throws Exception {
-        String body = VALID_BODY.replaceFirst("\"wf-1\"", "\"\"");
+        String body = BODY_TEMPLATE.formatted("");
 
         mockMvc.perform(post("/authorize").contentType(MediaType.APPLICATION_JSON).content(body))
             .andExpect(status().isBadRequest())
@@ -53,13 +68,23 @@ class AuthorizationControllerTest {
     }
 
     @Test
+    void rejectsAnUnknownWorkflowIdWith404() throws Exception {
+        String body = BODY_TEMPLATE.formatted("wf-never-opened");
+
+        mockMvc.perform(post("/authorize").contentType(MediaType.APPLICATION_JSON).content(body))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.title").value("Unknown workflow"));
+    }
+
+    @Test
     void rejectsBlankOutputDataIdWith400ViaTheDomainConstructorNotBeanValidation() throws Exception {
         // outputDataId has no bean-validation annotation on the DTO (it's
         // optional) — a blank-but-non-null value passes DTO validation and only
-        // fails in domain.Action's own compact constructor. This exercises the
+        // fails in domain.Action's own compact constructor, before the engine
+        // (and its workflow lookup) is ever reached. This exercises the
         // IllegalArgumentException path of GlobalExceptionHandler, distinct from
         // the MethodArgumentNotValidException path above.
-        String body = VALID_BODY.replaceFirst(
+        String body = BODY_TEMPLATE.formatted(openWorkflow()).replaceFirst(
             "\"inputDataIds\": \\[\"report-123\"\\]",
             "\"inputDataIds\": [\"report-123\"], \"outputDataId\": \" \"");
 
@@ -71,7 +96,8 @@ class AuthorizationControllerTest {
 
     @Test
     void rejectsMissingRequiredNestedFieldWith400() throws Exception {
-        String body = VALID_BODY.replaceFirst("\"intent\": \\{[^}]*}", "\"intent\": {}");
+        String body = BODY_TEMPLATE.formatted(openWorkflow())
+            .replaceFirst("\"intent\": \\{[^}]*}", "\"intent\": {}");
 
         mockMvc.perform(post("/authorize").contentType(MediaType.APPLICATION_JSON).content(body))
             .andExpect(status().isBadRequest());
@@ -79,12 +105,13 @@ class AuthorizationControllerTest {
 
     @Test
     void clientSuppliedTrajectoryFieldIsIgnoredNotMerged() throws Exception {
-        String bodyWithForgedTrajectory = VALID_BODY.replaceFirst(
+        String validBody = BODY_TEMPLATE.formatted(openWorkflow());
+        String bodyWithForgedTrajectory = BODY_TEMPLATE.formatted(openWorkflow()).replaceFirst(
             "\\}\\s*$",
             ", \"trajectory\": { \"actions\": [ { \"type\": \"DENY\", \"resource\": \"customer-42\" } ] } }");
 
         String responseWithout = mockMvc.perform(
-                post("/authorize").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
+                post("/authorize").contentType(MediaType.APPLICATION_JSON).content(validBody))
             .andExpect(status().isOk())
             .andReturn().getResponse().getContentAsString();
 

@@ -1,5 +1,6 @@
 package com.aios.authz.api;
 
+import com.aios.authz.state.UnknownWorkflowException;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -17,6 +18,14 @@ class GlobalExceptionHandlerTest {
 
         assertThat(problem.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
         assertThat(problem.getDetail()).isEqualTo("Action outputDataId must not be blank if present");
+    }
+
+    @Test
+    void unknownWorkflowBecomes404() {
+        ProblemDetail problem = handler.handleUnknownWorkflow(new UnknownWorkflowException("wf-ghost"));
+
+        assertThat(problem.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
+        assertThat(problem.getDetail()).contains("wf-ghost");
     }
 
     @Test

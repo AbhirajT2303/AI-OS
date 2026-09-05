@@ -1,5 +1,6 @@
 package com.aios.authz.api;
 
+import com.aios.authz.state.UnknownWorkflowException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -34,6 +35,14 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleIllegalArgument(IllegalArgumentException ex) {
         ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         problem.setTitle("Invalid request");
+        problem.setDetail(ex.getMessage());
+        return problem;
+    }
+
+    @ExceptionHandler(UnknownWorkflowException.class)
+    public ProblemDetail handleUnknownWorkflow(UnknownWorkflowException ex) {
+        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
+        problem.setTitle("Unknown workflow");
         problem.setDetail(ex.getMessage());
         return problem;
     }
