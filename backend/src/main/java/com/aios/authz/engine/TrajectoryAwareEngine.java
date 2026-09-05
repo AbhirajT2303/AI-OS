@@ -72,7 +72,7 @@ public final class TrajectoryAwareEngine implements AuthorizationEngine {
             combined = DecisionCombiner.combine(evaluations);
         }
 
-        String explanation = explanationFor(combined, evaluations);
+        String explanation = ExplanationBuilder.build(combined, evaluations);
         AuthorizationState nextState = commitTransition(state, request, combined);
         stateStore.save(nextState);
 
@@ -90,13 +90,5 @@ public final class TrajectoryAwareEngine implements AuthorizationEngine {
             : null;
 
         return StateTransition.apply(state, record, resolvedAsset);
-    }
-
-    private static String explanationFor(Decision combined, List<PolicyEvaluation> evaluations) {
-        return evaluations.stream()
-            .filter(evaluation -> evaluation.decision() == combined)
-            .map(PolicyEvaluation::reason)
-            .findFirst()
-            .orElse(combined.name());
     }
 }
