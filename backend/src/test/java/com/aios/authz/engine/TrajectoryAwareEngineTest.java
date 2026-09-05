@@ -14,8 +14,7 @@ import com.aios.authz.domain.Principal;
 import com.aios.authz.domain.PrincipalType;
 import com.aios.authz.domain.TrustZone;
 import com.aios.authz.policy.PolicyRegistry;
-import com.aios.authz.policy.rules.ConfidentialToExternalPolicy;
-import com.aios.authz.policy.rules.ModelBoundaryPolicy;
+import com.aios.authz.policy.rules.ProvenanceBoundaryPolicy;
 import com.aios.authz.state.AuthorizationState;
 import com.aios.authz.state.InMemoryAuthorizationStateStore;
 import com.aios.authz.state.UnknownWorkflowException;
@@ -43,8 +42,7 @@ class TrajectoryAwareEngineTest {
             new PermissionCatalog.Grant("agent-42", ActionType.CALL_MODEL, "*"),
             new PermissionCatalog.Grant("agent-42", ActionType.SEND_EXTERNAL, "*")));
         RbacBaselineEngine rbac = new RbacBaselineEngine(catalog);
-        PolicyRegistry registry = new PolicyRegistry(
-            List.of(new ConfidentialToExternalPolicy(), new ModelBoundaryPolicy()));
+        PolicyRegistry registry = new PolicyRegistry(List.of(new ProvenanceBoundaryPolicy()));
         DataAssetCatalog dataAssets = new DataAssetCatalog(List.of(
             new DataAsset("customer-42", Classification.CONFIDENTIAL, "customer-db"),
             new DataAsset("public-brochure", Classification.PUBLIC, "marketing-cms")));
